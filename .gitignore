@@ -1,3 +1,5 @@
 #certs
 ssl_certs/
 
+#pygame related cache
+__pycache__/
