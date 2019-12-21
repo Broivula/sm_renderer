@@ -1,7 +1,11 @@
 from socketIO_client import SocketIO, LoggingNamespace
 from queue import Queue
 from threading import Thread
-from renderer import render
+from renderer import Renderer 
+import json
+
+
+rend = Renderer()
 
 def network_socket_thread(o_que):
 	def on_connect():
@@ -30,8 +34,9 @@ def network_socket_thread(o_que):
 def rendering_thread(in_que):
 	while True:
 		data = in_que.get()
-		render(data)
-		print(data)
+		parsed_data = json.loads(data)
+		rend.update_rendered_data(parsed_data)
+
 		
 
 q = Queue()
@@ -40,6 +45,7 @@ thread_2 = Thread(target = rendering_thread, args=(q, ))
 
 thread_1.start()
 thread_2.start()
+
 
 q.join()
 	
