@@ -25,7 +25,7 @@ class Renderer:
 		font = pygame.font.Font('freesansbold.ttf', 32)
 		text = font.render(data["content"], True,  self.white,  self.black) 
 		textRect = text.get_rect()
-		textRect.center = (data["posX"],  data["posY"]) 
+		textRect.center = (data["posX"] * self.X,  data["posY"] * self.Y) 
 		return (text, textRect)
 	
 
