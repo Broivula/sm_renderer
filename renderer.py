@@ -12,6 +12,7 @@ class Renderer:
 	def __init__(self):	
 		pygame.init()
 		self.display_surface = pygame.display.set_mode((self.X, self.Y))
+		pygame.event.wait()
 		
 	
 	def update_rendered_data(self, data):
