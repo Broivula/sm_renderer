@@ -1,11 +1,17 @@
 import json
-class D_Processing:
+from queue import Queue
+from mirror_networking import Networking
 
-    def __init__(self):
+class D_Processing(object):
+
+    def __init__(self, r_que ):
         print("data processing initialized")
+        self.r_que = r_que
 
-    def process(data):
+    def process(self, data):
         # frist we have to figure out where the data is from
         # I think we should use json as a format
-        parsed_data = json.loads(data)
-        print(parsed_data)
+        #parsed_data = json.loads(data)
+        #print(parsed_data)
+        print("ladilaa processing some data..")
+        self.r_que.put(data)

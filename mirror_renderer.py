@@ -20,13 +20,11 @@ class Renderer:
        self.master.configure(bg="black")             # set the background black
 
     def __start__(self):
-        print("here")
         self.master.mainloop()
 
     def draw_label(self, data):
         # let's just start with the basics, first just render a text box here
         # or rather generate a new text box
-        print("here we are bois")
         new_label = tk.Label(self.master,
                              text=data,
                              foreground="white",

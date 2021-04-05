@@ -23,6 +23,7 @@ class Networking(object):
                 while True:
                     data = s.recv(1024)
                     if len(data) > 0:
+                        print("data entering pipeline:")
                         print(data)
                         # so we received some data via the sockets
                         # it's either a note, or a picture
@@ -53,6 +54,9 @@ class Networking(object):
             s_thread.start()
         except:
             print("error on socket creation")
+
+    def fetch_new_picture(self):
+        print("new picture fetched.")
 
     def send_data_to_be_processed(self, data):
         print("sending data to be processed...")
