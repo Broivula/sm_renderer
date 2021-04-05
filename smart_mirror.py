@@ -1,4 +1,5 @@
 import time
+import asyncio
 from queue import Queue
 from threading import Thread
 from mirror_renderer import Renderer
@@ -13,17 +14,18 @@ d_processor = D_Processing()
 def networking_thread(p_que):
 	# do networking stuff
 	# some data arrives
-	net = Networking()
-	p_que.put("dataa")
+	net = Networking(p_que)
 
 def data_processing_thread(p_que, r_que):
 	while True:
 		data = p_que.get()
+		print("new data to be processed!")
+		print(data)
 		# process the incoming data
 		# spit out the processed data to be rendered
-		r_que.put(d_processor.process(data))
+		r_que.put(data)
 
-def rendering_thread(r_que):
+async def async_rendering(r_que):
 	global rend
 	while True:
 		data = r_que.get()
@@ -32,13 +34,11 @@ def rendering_thread(r_que):
 rendering_que = Queue()
 processing_que = Queue()
 thread_1 = Thread(target = networking_thread, args=(processing_que, ))
-thread_2 = Thread(target = rendering_thread, args=(rendering_que,))
-#thread_3 = Thread(target = data_processing_thread, args=(processing_que,rendering_que ))
+thread_2 = Thread(target = data_processing_thread, args=(processing_que,rendering_que ))
 thread_1.start()
 thread_2.start()
 rendering_que.join()
-processing_que
-rend.draw_label("kikkel")
-time.sleep(3)
-rendering_que.put("kikel man")
+processing_que.join()
+processing_que.put("kikel man")
+asyncio.run(async_rendering(rendering_que))
 rend.__start__()
