@@ -1,53 +1,44 @@
-from socketIO_client import SocketIO, LoggingNamespace
+import time
 from queue import Queue
 from threading import Thread
-from renderer import Renderer 
+from mirror_renderer import Renderer
+from data_processing import D_Processing
+from mirror_networking import Networking
 import json
 
-
+socket_port = 8928
 rend = Renderer()
+d_processor = D_Processing()
 
-def network_socket_thread(o_que):
-	def on_connect():
-		print('connected!')
-		socketIO.emit('new_message')
-		
-	def on_disconnect():
-		print('disconnected')
-		
-	def on_response(data):
-		#print('incoming data! ' + str(data))
-		o_que.put(data)
+def networking_thread(p_que):
+	# do networking stuff
+	# some data arrives
+	net = Networking()
+	p_que.put("dataa")
 
-	 
-	try:
-		socketIO = SocketIO('https://localhost:3000', verify=False, transports='websocket')
-		socketIO.on('connect', on_connect)
-		socketIO.on('disconnect', on_disconnect)
-		socketIO.on('response', on_response)
-		socketIO.wait()
-	except Exception as err:
-		print('connection failed')
-		print(str(err))
-
-
-def rendering_thread(in_que):
+def data_processing_thread(p_que, r_que):
 	while True:
-		data = in_que.get()
-		parsed_data = json.loads(data)
-		rend.update_rendered_data(parsed_data)
+		data = p_que.get()
+		# process the incoming data
+		# spit out the processed data to be rendered
+		r_que.put(d_processor.process(data))
 
-		
+def rendering_thread(r_que):
+	global rend
+	while True:
+		data = r_que.get()
+		rend.draw_label(data)
 
-q = Queue()
-thread_1 = Thread(target = network_socket_thread, args=(q, ))
-thread_2 = Thread(target = rendering_thread, args=(q, ))
-
+rendering_que = Queue()
+processing_que = Queue()
+thread_1 = Thread(target = networking_thread, args=(processing_que, ))
+thread_2 = Thread(target = rendering_thread, args=(rendering_que,))
+#thread_3 = Thread(target = data_processing_thread, args=(processing_que,rendering_que ))
 thread_1.start()
 thread_2.start()
-
-
-q.join()
-	
-
-
+rendering_que.join()
+processing_que
+rend.draw_label("kikkel")
+time.sleep(3)
+rendering_que.put("kikel man")
+rend.__start__()
