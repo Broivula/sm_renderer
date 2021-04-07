@@ -25,6 +25,11 @@ class Renderer:
 
         # the function to draw the clock
         # hopefully only gets called once, althought I'm already wondering about how should it be updated
+        # how all of the following functions work, is that they return a dictionary (or json) of data, 
+        # which then contains all the information how draw_label function should draw it.
+        # So this is the flow: draw_label function gets called -> it checks which label it's updating
+        # then it calls the updating function (the ones below), which do all the nitty gritty
+        # the updating function returns a data structure, which then the draw_label function draws.
     def create_clock(self):
         print("clock function")
 
@@ -34,6 +39,14 @@ class Renderer:
         # if < max, then draw it on top, move others down
     def create_notes(self):
         print("notes function")
+        y_dat = round(len(self.notes_labels) * 0.1, 1)
+        print("ydat : ", y_dat)
+        data = {
+            "pos": "ne",
+            "relx": 1.0,
+            "rely": y_dat
+        }
+        return data
 
         # the function to draw the weather
         # probably gets called once every hour? half hour? I don't know
@@ -72,17 +85,22 @@ class Renderer:
         # let's just start with the basics, first just render a text box here
         # or rather generate a new text box
         # this label thing is just a placeholder, ignore it later
-        new_label = tk.Label(self.master,
-                             text=data,
-                             foreground="white",
-                             background="black")
-
         # we get the data here, and determine which function we draw. 
         # if the received data was news, we draw news etc.
 
         func = self.update_function.get(int(data))
-        func()
-        new_label.pack()
+        label_data = func()
+        print("label positioning data: ", label_data)
+        new_label = tk.Label(self.master,
+                             text=data,
+                             foreground="white",
+                             background="black")
+        new_label.place(relx=label_data.get("relx"),
+                        rely=label_data.get("rely"),
+                        anchor=label_data.get("pos"))
+        self.notes_labels.append(new_label)
+        #new_label.pack()
+        print("# of notes: ", len(self.notes_labels))
         self.master.update()
 
 
