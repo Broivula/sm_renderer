@@ -14,4 +14,5 @@ class D_Processing(object):
         #parsed_data = json.loads(data)
         #print(parsed_data)
         print("ladilaa processing some data..")
-        self.r_que.put(data)
+        decoded_data = data.decode('utf-8')
+        self.r_que.put(decoded_data)

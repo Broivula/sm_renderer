@@ -26,20 +26,26 @@ def data_processing_thread(p_que, r_que):
 		d_processor.process(data)
 
 async def async_rendering(r_que):
-	global rend
-	while True:
-		data = r_que.get()
-		rend.draw_label(data)
-		print("data exiting pipeline:")
-		print(data)
+    global rend
+    rend.__start__()
+    while True:
+        data = r_que.get()
+        rend.draw_label(data)
+        print("data exiting pipeline:")
+        print(data)
 
-rendering_que = Queue()
-processing_que = Queue()
-thread_1 = Thread(target = networking_thread, args=(processing_que, ))
-thread_2 = Thread(target = data_processing_thread, args=(processing_que,rendering_que))
-thread_1.start()
-thread_2.start()
-rendering_que.join()
-processing_que.join()
-asyncio.run(async_rendering(rendering_que))
-rend.__start__()
+
+def main():
+    rendering_que = Queue()
+    processing_que = Queue()
+    thread_1 = Thread(target = networking_thread, args=(processing_que, ))
+    thread_2 = Thread(target = data_processing_thread, args=(processing_que,rendering_que))
+    thread_1.start()
+    thread_2.start()
+    rendering_que.join()
+    processing_que.join()
+    asyncio.run(async_rendering(rendering_que))
+    rend.__start__()
+
+if __name__=="__main__":
+    main()
