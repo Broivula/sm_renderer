@@ -37,22 +37,24 @@ class Renderer:
         # first it should check how many notes are already drawn
         # if max amount -> delete the one at the bottom, draw a new one on top
         # if < max, then draw it on top, move others down
-    def create_notes(self):
+    def create_notes(self, data):
         print("notes function")
-        y_dat = round(len(self.notes_labels) * 0.1, 1)
+        y_dat = round(len(self.notes_labels) * 0.02, 2)
         print("ydat : ", y_dat)
-        data = {
+        label_data = {
             "pos": "ne",
             "relx": 1.0,
-            "rely": y_dat
+            "rely": y_dat,
+            "msg": data.msg,
+            "exp": data.expire
         }
-        return data
+        return label_data
 
         # the function to draw the weather
         # probably gets called once every hour? half hour? I don't know
         # draws a string indicating the amount of temperature
         # and a cute symbol next to it. :) :)
-    def create_weather(self):
+    def create_weather(self, data):
         print("weather function")
 
         # the function which draws the news strings
@@ -88,11 +90,11 @@ class Renderer:
         # we get the data here, and determine which function we draw. 
         # if the received data was news, we draw news etc.
 
-        func = self.update_function.get(int(data))
-        label_data = func()
+        func = self.update_function.get(int(data.sub_id))
+        label_data = func(data)
         print("label positioning data: ", label_data)
         new_label = tk.Label(self.master,
-                             text=data,
+                             text=data.msg,
                              foreground="white",
                              background="black")
         new_label.place(relx=label_data.get("relx"),

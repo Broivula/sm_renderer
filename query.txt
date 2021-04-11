@@ -1,0 +1,1 @@
+http://opendata.fmi.fi/wfs?fmi::observations::weather::cities::multipointcoverageservice=WFS&version=2.0.0&request=getFeature&storedquery_id=fmi::observations::weather::hourly::multipointcoverage&place=Mäntsälä

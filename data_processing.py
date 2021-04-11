@@ -1,4 +1,5 @@
 import json
+from types import SimpleNamespace
 from queue import Queue
 from mirror_networking import Networking
 
@@ -14,5 +15,5 @@ class D_Processing(object):
         #parsed_data = json.loads(data)
         #print(parsed_data)
         print("ladilaa processing some data..")
-        decoded_data = data.decode('utf-8')
-        self.r_que.put(decoded_data)
+        parsed_data = json.loads(data.decode('utf-8'), object_hook=lambda d: SimpleNamespace(**d))
+        self.r_que.put(parsed_data)
