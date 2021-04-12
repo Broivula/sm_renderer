@@ -8,6 +8,15 @@ class Renderer:
     master = None                               # placeholder for our window
     news_labels = []
     notes_labels = []
+    notes_base_y_pos = 0.5
+    notes_base_x_pos = 1
+    clock_base_y_pos = 0.1
+    clock_base_x_pos = 1
+    weather_base_y_pos = 0.1
+    weather_base_x_pos = 0.1
+    news_base_y_pos = 1
+    news_base_x_pos = 0.1
+
 
     update_function = {}
 
@@ -39,11 +48,11 @@ class Renderer:
         # if < max, then draw it on top, move others down
     def create_notes(self, data):
         print("notes function")
-        y_dat = round(len(self.notes_labels) * 0.02, 2)
+        y_dat = round(len(self.notes_labels) * 0.02, 2) + self.notes_base_y_pos
         print("ydat : ", y_dat)
         label_data = {
-            "pos": "ne",
-            "relx": 1.0,
+            "pos": "e",
+            "relx": self.notes_base_x_pos,
             "rely": y_dat,
             "msg": data.msg,
             "exp": data.expire
@@ -56,6 +65,15 @@ class Renderer:
         # and a cute symbol next to it. :) :)
     def create_weather(self, data):
         print("weather function")
+        label_data = {
+            "pos": "ne",
+            "relx": self.weather_base_x_pos,
+            "rely": self.weather_base_y_pos,
+            "msg": data.msg,
+            "exp": None
+        }
+        return label_data
+
 
         # the function which draws the news strings
         # so basically as with every one of the other functions here, the
@@ -63,8 +81,16 @@ class Renderer:
         # to draw it on a certain location. (just reminding myself.)
         # Works in a similar fashion as the notes function
         # news get drawn every.. i don't know, 20 minutes?
-    def create_news(self):
+    def create_news(self, data):
         print("news function")
+        label_data = {
+            "pos": "sw",
+            "relx": self.news_base_x_pos,
+            "rely": self.news_base_y_pos,
+            "msg": data.msg,
+            "exp": None
+        }
+        return label_data
 
         # the picture function is (hopefully) going to be fairly simple, or I don't know
         # some validation is needed, for sure. But idea is, that one could send a picture from their 
