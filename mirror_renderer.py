@@ -8,6 +8,7 @@ class Renderer:
     master = None                               # placeholder for our window
     news_labels = []
     notes_labels = []
+    weather_label = None
     notes_base_y_pos = 0.5
     notes_base_x_pos = 1
     clock_base_y_pos = 0.1
@@ -16,6 +17,8 @@ class Renderer:
     weather_base_x_pos = 0.1
     news_base_y_pos = 1
     news_base_x_pos = 0.1
+    last_updated_note = 0
+    last_updated_news = 0
 
 
     update_function = {}
@@ -46,33 +49,19 @@ class Renderer:
         # first it should check how many notes are already drawn
         # if max amount -> delete the one at the bottom, draw a new one on top
         # if < max, then draw it on top, move others down
-    def create_notes(self, data):
+    def create_notes(self):
         print("notes function")
-        y_dat = round(len(self.notes_labels) * 0.02, 2) + self.notes_base_y_pos
-        print("ydat : ", y_dat)
-        label_data = {
-            "pos": "e",
-            "relx": self.notes_base_x_pos,
-            "rely": y_dat,
-            "msg": data.msg,
-            "exp": data.expire
-        }
-        return label_data
+    #def create_empty_lables(sub_id, amount, x_pos, y_pos, anchor):
+        self.create_empty_labels(1, 5, self.notes_base_x_pos, self.notes_base_y_pos, "e")
+
 
         # the function to draw the weather
         # probably gets called once every hour? half hour? I don't know
         # draws a string indicating the amount of temperature
         # and a cute symbol next to it. :) :)
-    def create_weather(self, data):
+    def create_weather(self):
         print("weather function")
-        label_data = {
-            "pos": "ne",
-            "relx": self.weather_base_x_pos,
-            "rely": self.weather_base_y_pos,
-            "msg": data.msg,
-            "exp": None
-        }
-        return label_data
+        self.create_empty_labels(2, 1, self.weather_base_x_pos, self.weather_base_y_pos, "nw")
 
 
         # the function which draws the news strings
@@ -81,16 +70,9 @@ class Renderer:
         # to draw it on a certain location. (just reminding myself.)
         # Works in a similar fashion as the notes function
         # news get drawn every.. i don't know, 20 minutes?
-    def create_news(self, data):
+    def create_news(self):
         print("news function")
-        label_data = {
-            "pos": "sw",
-            "relx": self.news_base_x_pos,
-            "rely": self.news_base_y_pos,
-            "msg": data.msg,
-            "exp": None
-        }
-        return label_data
+        self.create_empty_labels(3, 5, self.news_base_x_pos, self.news_base_y_pos, "sw")
 
         # the picture function is (hopefully) going to be fairly simple, or I don't know
         # some validation is needed, for sure. But idea is, that one could send a picture from their 
@@ -98,6 +80,63 @@ class Renderer:
         # maybe implement this last, since it's an extra anyway.
     def create_picture(self):
         print("picture function")
+
+    def create_empty_labels(self, sub_id, amount, x_pos, y_pos, anchor):
+        for x in range(amount):
+            new_label = tk.Label(self.master,
+                                 text="",
+                                 foreground="white",
+                                 background="black")
+            if sub_id == 1:
+                y_pos = round(len(self.notes_labels) * 0.02, 2) + self.notes_base_y_pos
+                self.notes_labels.append(new_label)
+            elif sub_id == 2:
+                self.weather_label = new_label
+            elif sub_id == 3:
+                y_pos = round(len(self.news_labels) * 0.02, 2) + self.news_base_y_pos
+                self.news_labels.append(new_label)
+
+            new_label.place(relx=x_pos,
+                            rely=y_pos,
+                            anchor=anchor)
+
+    def check_if_label_empty(self, label):
+        t_input = label["text"]
+        if t_input == "":
+            print("there is no text!")
+            return True
+        else:
+            print("found some text.")
+            return False
+
+
+    def get_writeable_label(self, sub_id):
+        print("SELF.last", self.last_updated_note)
+        if sub_id == 1:
+            if self.last_updated_note < 4:
+                temp = self.last_updated_note
+                self.last_updated_note += 1
+                return self.notes_labels[temp]
+            else:
+                temp = self.last_updated_note
+                self.last_updated_note = 0
+                return self.notes_labels[temp]
+        elif data.sub_id == 3:
+            if self.last_updated_news < 4:
+                temp = self.last_updated_news
+                self.last_updated_news += 1
+                return self.news_labels[temp]
+            else:
+                temp = self.last_updated_news
+                self.last_updated_news = 0
+                return self.news_labels[temp]
+        else:
+            return self.weather_label
+
+    def update_label(self, data):
+        label = self.get_writeable_label(data.sub_id)
+        label.config(text=data.msg)
+
 
     def __start__(self):
         self.update_function = {
@@ -107,6 +146,9 @@ class Renderer:
             3:self.create_news,
             4:self.create_picture
         }
+        for x in range(5):
+            func = self.update_function.get(x)
+            func()
         self.master.update()
 
     def draw_label(self, data):
@@ -116,26 +158,9 @@ class Renderer:
         # we get the data here, and determine which function we draw. 
         # if the received data was news, we draw news etc.
 
-        func = self.update_function.get(int(data.sub_id))
-        label_data = func(data)
-        print("label positioning data: ", label_data)
-        new_label = tk.Label(self.master,
-                             text=data.msg,
-                             foreground="white",
-                             background="black")
-        new_label.place(relx=label_data.get("relx"),
-                        rely=label_data.get("rely"),
-                        anchor=label_data.get("pos"))
-        self.notes_labels.append(new_label)
-        #new_label.pack()
-        print("# of notes: ", len(self.notes_labels))
+        self.update_label(data)
         self.master.update()
 
-
-
-    #   Update a single text label
-    def update_label(self,data):
-        print("update label")
 
     #   A function to create the placeholders for the text locations
 #    def create_placeholders(self):
