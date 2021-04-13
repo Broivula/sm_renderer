@@ -109,6 +109,11 @@ class Renderer:
             print("found some text.")
             return False
 
+# so this current implementation is fucking shit and I just came back here to comment
+# that this better be changed in the future.
+# it's not pretty, it's clunky and there is no trace of fucking elegance to be found
+# Most of this ugly shit I can blame on my hunger - I should've fucking eaten before
+# continuing this with an empty stomach.
 
     def get_writeable_label(self, sub_id):
         print("SELF.last", self.last_updated_note)
