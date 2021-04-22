@@ -126,7 +126,7 @@ class Renderer:
                 temp = self.last_updated_note
                 self.last_updated_note = 0
                 return self.notes_labels[temp]
-        elif data.sub_id == 3:
+        elif sub_id == 3:
             if self.last_updated_news < 4:
                 temp = self.last_updated_news
                 self.last_updated_news += 1

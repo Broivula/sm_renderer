@@ -6,13 +6,20 @@ from queue import Queue
 host = '127.0.0.1'
 port = 8929
 test_data = "I'm here, bitch!!"
+from fmiopendata.wfs import download_stored_query
+w_query = "fmi::observations::weather::multipointcoverage"
+
 
 class Networking(object):
+    location = "Mäntsälä"
 
     def __init__(self, p_que):
         self.initialize_socket()
         self.p_que = p_que
-        asyncio.run(self.fetch_weather())
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        future = asyncio.ensure_future(self.data_fetcher())
+        loop.run_until_complete(future)
 
     def socket_listener_thread(self):
         try:
@@ -28,7 +35,8 @@ class Networking(object):
                         # so we received some data via the sockets
                         # it's either a note, or a picture
                         # either way, let's send the data to be processed
-                        self.send_data_to_be_processed(data)
+                        _data = {"content":data, "pipe":1}
+                        self.send_data_to_be_processed(_data)
                     else:
                         self.test_socket_connection(s)
                     if not data: break
@@ -63,12 +71,20 @@ class Networking(object):
         self.p_que.put(data)
 
     async def data_fetcher(self):
-        asyncio.run(self.fetch_weather())
-        asyncio.run(self.fetch_news())
+        while 1:
+            asyncio.ensure_future(self.fetch_weather())
+            await asyncio.sleep(10)
+        #asyncio.run(self.fetch_weather())
+        #asyncio.run(self.fetch_news())
+        #await asyncio.sleep(60)
+        #asyncio.run(self.data_fetcher())
+
 
     async def fetch_weather(self):
-        await asyncio.sleep(2)
+        d = download_stored_query(w_query, ["place="+self.location])
         print("weather fetched")
+        _data = {"content":d, "pipe":2}
+        self.send_data_to_be_processed(_data)
 
     async def fetch_news(self):
         await asyncio.sleep(4)
