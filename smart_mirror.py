@@ -1,5 +1,6 @@
 import time
 import asyncio
+import clock
 from queue import Queue
 from threading import Thread
 from mirror_renderer import Renderer
@@ -40,8 +41,12 @@ def main():
     processing_que = Queue()
     thread_1 = Thread(target = networking_thread, args=(processing_que, ))
     thread_2 = Thread(target = data_processing_thread, args=(processing_que,rendering_que))
+    thread_1.setDaemon(True)
+    thread_2.setDaemon(True)
     thread_1.start()
     thread_2.start()
+    clock.start_clock(rendering_que)
+    print("back here.")
     rendering_que.join()
     processing_que.join()
     asyncio.run(async_rendering(rendering_que))

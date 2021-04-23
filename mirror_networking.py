@@ -12,6 +12,7 @@ w_query = "fmi::observations::weather::multipointcoverage"
 
 class Networking(object):
     location = "Mäntsälä"
+    cycle_time = 300
 
     def __init__(self, p_que):
         self.initialize_socket()
@@ -73,7 +74,7 @@ class Networking(object):
     async def data_fetcher(self):
         while 1:
             asyncio.ensure_future(self.fetch_weather())
-            await asyncio.sleep(10)
+            await asyncio.sleep(self.cycle_time)
         #asyncio.run(self.fetch_weather())
         #asyncio.run(self.fetch_news())
         #await asyncio.sleep(60)

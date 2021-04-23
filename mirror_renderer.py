@@ -1,6 +1,11 @@
 import tkinter as tk
 import sys
+from datetime import datetime
 import os
+import json
+import asyncio
+import clock
+from types import SimpleNamespace
 
 class Renderer:
 
@@ -9,12 +14,16 @@ class Renderer:
     news_labels = []
     notes_labels = []
     weather_label = None
+    digital_clock_label = None
+    date_label = None
+    date_base_y_pos = 0.05
+    date_base_x_pos = 0.95
     notes_base_y_pos = 0.5
-    notes_base_x_pos = 1
+    notes_base_x_pos = 0.95
     clock_base_y_pos = 0.1
-    clock_base_x_pos = 1
+    clock_base_x_pos = 0.95
     weather_base_y_pos = 0.1
-    weather_base_x_pos = 0.1
+    weather_base_x_pos = 0.05
     news_base_y_pos = 1
     news_base_x_pos = 0.1
     last_updated_note = 0
@@ -35,15 +44,18 @@ class Renderer:
        self.master.geometry("400x800")               # just some initial values, will be fullscreen
        self.master.configure(bg="black")             # set the background black
 
-        # the function to draw the clock
+       # the function to draw the clock
         # hopefully only gets called once, althought I'm already wondering about how should it be updated
         # how all of the following functions work, is that they return a dictionary (or json) of data, 
         # which then contains all the information how draw_label function should draw it.
         # So this is the flow: draw_label function gets called -> it checks which label it's updating
         # then it calls the updating function (the ones below), which do all the nitty gritty
         # the updating function returns a data structure, which then the draw_label function draws.
+
+
     def create_clock(self):
         print("clock function")
+        self.create_empty_labels(0, 1, self.clock_base_x_pos, self.clock_base_y_pos, "ne")
 
         # the function to draw notes
         # first it should check how many notes are already drawn
@@ -74,6 +86,11 @@ class Renderer:
         print("news function")
         self.create_empty_labels(3, 5, self.news_base_x_pos, self.news_base_y_pos, "sw")
 
+    def create_date(self):
+        print("date function")
+        self.create_empty_labels(4, 1, self.date_base_x_pos, self.date_base_y_pos, "ne")
+
+
         # the picture function is (hopefully) going to be fairly simple, or I don't know
         # some validation is needed, for sure. But idea is, that one could send a picture from their 
         # gallery, and it could get drawn. One picture at a time. 
@@ -87,7 +104,9 @@ class Renderer:
                                  text="",
                                  foreground="white",
                                  background="black")
-            if sub_id == 1:
+            if sub_id == 0:
+                self.clock_label = new_label
+            elif sub_id == 1:
                 y_pos = round(len(self.notes_labels) * 0.02, 2) + self.notes_base_y_pos
                 self.notes_labels.append(new_label)
             elif sub_id == 2:
@@ -95,6 +114,8 @@ class Renderer:
             elif sub_id == 3:
                 y_pos = round(len(self.news_labels) * 0.02, 2) + self.news_base_y_pos
                 self.news_labels.append(new_label)
+            elif sub_id == 4:
+                self.date_label = new_label
 
             new_label.place(relx=x_pos,
                             rely=y_pos,
@@ -116,8 +137,10 @@ class Renderer:
 # continuing this with an empty stomach.
 
     def get_writeable_label(self, sub_id):
-        print("SELF.last", self.last_updated_note)
-        if sub_id == 1:
+
+        if sub_id == 0:
+            return (self.clock_label, self.date_label)
+        elif sub_id == 1:
             if self.last_updated_note < 4:
                 temp = self.last_updated_note
                 self.last_updated_note += 1
@@ -126,6 +149,8 @@ class Renderer:
                 temp = self.last_updated_note
                 self.last_updated_note = 0
                 return self.notes_labels[temp]
+        elif sub_id == 2:
+            return self.weather_label
         elif sub_id == 3:
             if self.last_updated_news < 4:
                 temp = self.last_updated_news
@@ -135,12 +160,14 @@ class Renderer:
                 temp = self.last_updated_news
                 self.last_updated_news = 0
                 return self.news_labels[temp]
-        else:
-            return self.weather_label
 
     def update_label(self, data):
         label = self.get_writeable_label(data.sub_id)
-        label.config(text=data.msg)
+        if type(label) == tuple:
+            label[0].config(text=data.msg[0])
+            label[1].config(text=data.msg[1])
+        else:
+            label.config(text=data.msg)
 
 
     def __start__(self):
@@ -149,7 +176,8 @@ class Renderer:
             1:self.create_notes,
             2:self.create_weather,
             3:self.create_news,
-            4:self.create_picture
+            4:self.create_date,
+            5:self.create_picture
         }
         for x in range(5):
             func = self.update_function.get(x)
