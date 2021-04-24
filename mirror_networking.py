@@ -1,6 +1,7 @@
 import socket
 import time
 import asyncio
+import requests
 from threading import Thread
 from queue import Queue
 host = '127.0.0.1'
@@ -13,6 +14,8 @@ w_query = "fmi::observations::weather::multipointcoverage"
 class Networking(object):
     location = "Mäntsälä"
     cycle_time = 300
+    news_src = 0
+    news_urls = {0:"https://www.yle.fi/uutiset"}
 
     def __init__(self, p_que):
         self.initialize_socket()
@@ -74,9 +77,9 @@ class Networking(object):
     async def data_fetcher(self):
         while 1:
             asyncio.ensure_future(self.fetch_weather())
+            asyncio.ensure_future(self.fetch_news())
             await asyncio.sleep(self.cycle_time)
         #asyncio.run(self.fetch_weather())
-        #asyncio.run(self.fetch_news())
         #await asyncio.sleep(60)
         #asyncio.run(self.data_fetcher())
 
@@ -89,5 +92,8 @@ class Networking(object):
 
     async def fetch_news(self):
         await asyncio.sleep(4)
+        response = requests.get(self.news_urls[self.news_src])
+        _data = {"content":response.content.decode('utf-8'), "pipe":3, "src":self.news_src}
+        self.send_data_to_be_processed(_data)
         print("news fetched")
 

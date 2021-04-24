@@ -24,7 +24,7 @@ class Renderer:
     clock_base_x_pos = 0.95
     weather_base_y_pos = 0.1
     weather_base_x_pos = 0.05
-    news_base_y_pos = 1
+    news_base_y_pos = 0.95
     news_base_x_pos = 0.1
     last_updated_note = 0
     last_updated_news = 0
@@ -112,7 +112,7 @@ class Renderer:
             elif sub_id == 2:
                 self.weather_label = new_label
             elif sub_id == 3:
-                y_pos = round(len(self.news_labels) * 0.02, 2) + self.news_base_y_pos
+                y_pos = self.news_base_y_pos - round(len(self.news_labels) * 0.02, 2)
                 self.news_labels.append(new_label)
             elif sub_id == 4:
                 self.date_label = new_label
@@ -191,7 +191,11 @@ class Renderer:
         # we get the data here, and determine which function we draw. 
         # if the received data was news, we draw news etc.
 
-        self.update_label(data)
+        if data.sub_id == 3:
+            for news in data.parsed_news:
+                self.update_label(json.loads(news, object_hook= lambda d: SimpleNamespace(**d)))
+        else:self.update_label(data)
+
         self.master.update()
 
 

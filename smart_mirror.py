@@ -20,7 +20,6 @@ def data_processing_thread(p_que, r_que):
 	d_processor = D_Processing(r_que)
 	while True:
 		data = p_que.get()
-		print("new data to be processed!")
 		# process the incoming data
 		# spit out the processed data to be rendered
 		# -> processed data gets queued inside the class
@@ -32,8 +31,6 @@ async def async_rendering(r_que):
     while True:
         data = r_que.get()
         rend.draw_label(data)
-        print("data exiting pipeline:")
-        print(data)
 
 
 def main():
@@ -46,7 +43,6 @@ def main():
     thread_1.start()
     thread_2.start()
     clock.start_clock(rendering_que)
-    print("back here.")
     rendering_que.join()
     processing_que.join()
     asyncio.run(async_rendering(rendering_que))
